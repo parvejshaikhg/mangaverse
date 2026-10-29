@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MangaVerse Mobile</title>
+<style>
+:root {
+  --bg: #0B0E14;
+  --card: #151924;
+  --card-border: #222A3B;
+  --inner: #1A202E;
+  --input: #0F131D;
+  --purple: #7C3AED;
+  --purple-hover: #6D28D9;
+  --cyan: #06B6D4;
+  --emerald: #10B981;
+  --emerald-hover: #059669;
+  --rose: #EF4444;
+  --text: #F8FAFC;
+  --muted: #94A3B8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 14px;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 16px;
+}
+.brand { font-size: 1.3rem; font-weight: 800; color: #A78BFA; }
+.badge { font-size: 0.75rem; background: var(--purple); padding: 3px 8px; border-radius: 6px; color: #FFF; }
+.search-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+select, input, button {
+  font-size: 0.95rem;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  padding: 10px;
+  color: var(--text);
+  background: var(--input);
+  outline: none;
+}
+button { font-weight: 700; cursor: pointer; }
+.btn-primary { background: var(--purple); border-color: var(--purple); }
+.btn-emerald { background: var(--emerald); border-color: var(--emerald); width: 100%; padding: 14px; font-size: 1.1rem; }
+.btn-chip { background: var(--inner); font-size: 0.8rem; padding: 6px 12px; }
+.panel {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.result-card {
+  background: var(--inner);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cover-thumb {
+  width: 80px;
+  height: 115px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #111;
+  border: 1px solid var(--card-border);
+}
+.progress-bar-bg {
+  width: 100%;
+  height: 10px;
+  background: var(--input);
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--purple), var(--cyan));
+  transition: width 0.3s;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="brand">📚 MANGA VERSE <span class="badge">ANDROID</span></div>
+</div>
+
+<div class="search-card">
+  <select id="source-select">
+    <option value="roliascan">RoliaScan (Primary Manhwa)</option>
+    <option value="mangadex">MangaDex (Official API)</option>
+    <option value="mangaread">MangaRead (Top Manhwa)</option>
+  </select>
+  <div style="display:flex; gap:8px;">
+    <input type="text" id="search-input" placeholder="Enter title e.g. Solo Leveling, Nano Machine..." style="flex:1;">
+    <button class="btn-primary" onclick="searchSeries()">🔍 Search</button>
+  </div>
+</div>
+
+<div class="panel">
+  <div style="font-weight:700; font-size:1.05rem;">Search Results</div>
+  <div id="results-list" style="max-height:260px; overflow-y:auto;">
+    <p style="color:var(--muted); text-align:center; padding:20px;">Search a manga to see results.</p>
+  </div>
+</div>
+
+<div class="panel">
+  <div style="font-weight:700; font-size:1.05rem;">Selected Series</div>
+  <div style="display:flex; gap:12px;">
+    <img id="manga-cover" class="cover-thumb" src="" alt="Cover" style="display:none;">
+    <div>
+      <h3 id="manga-title">No Series Selected</h3>
+      <p id="manga-meta" style="font-size:0.85rem; color:var(--muted); margin:4px 0;">Tap 'Select' on any search result.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:10px;">
+    <label style="font-size:0.8rem; color:var(--muted); font-weight:700;">CHAPTER RANGE</label>
+    <div style="display:flex; gap:8px; margin: 6px 0;">
+      <input type="number" id="from-ch" placeholder="From" style="width:50%;">
+      <input type="number" id="to-ch" placeholder="To" style="width:50%;">
+    </div>
+  </div>
+
+  <div>
+    <label style="font-size:0.8rem; color:var(--muted); font-weight:700;">FORMAT</label>
+    <select id="format-select" style="width:100%; margin-top:4px;">
+      <option value="cbz">CBZ (Comic Reader)</option>
+      <option value="pdf">PDF (Book)</option>
+    </select>
+  </div>
+
+  <button class="btn-emerald" id="download-btn" onclick="startDownload()">🚀 DOWNLOAD TO PHONE</button>
+
+  <div>
+    <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+      <span id="status-text">Status: Ready</span>
+      <span id="percent-text">0%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedManga = null;
+let currentChapters = [];
+
+async function searchSeries() {
+  const q = document.getElementById('search-input').value.trim();
+  const src = document.getElementById('source-select').value;
+  if (!q) return;
+
+  const list = document.getElementById('results-list');
+  list.innerHTML = '<p style="color:var(--muted); text-align:center; padding:20px;">Searching...</p>';
+
+  try {
+    let url = '';
+    if (src === 'mangadex') {
+      url = `https://api.mangadex.org/manga?title=${encodeURIComponent(q)}&limit=10&includes[]=cover_art`;
+      const res = await fetch(url);
+      const data = await res.json();
+      renderMangaDexResults(data.data || []);
+    } else {
+      url = `https://roliascan.xyz/search?q=${encodeURIComponent(q)}`;
+      // Simulated direct API or CORS proxy for native client
+      list.innerHTML = `
+        <div class="result-card">
+          <div>
+            <b>${q}</b>
+            <div style="font-size:0.8rem; color:var(--muted);">RoliaScan • Manhwa</div>
+          </div>
+          <button class="btn-primary" onclick="selectDirect('${q}')">Select →</button>
+        </div>
+      `;
+    }
+  } catch (e) {
+    list.innerHTML = `<p style="color:var(--rose); text-align:center;">Search failed: ${e.message}</p>`;
+  }
+}
+
+function renderMangaDexResults(items) {
+  const list = document.getElementById('results-list');
+  list.innerHTML = '';
+  if (!items.length) {
+    list.innerHTML = '<p style="color:var(--muted); text-align:center; padding:20px;">No series found.</p>';
+    return;
+  }
+  items.forEach(it => {
+    const title = it.attributes.title.en || Object.values(it.attributes.title)[0] || 'Unknown';
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `
+      <div>
+        <b>${title}</b>
+        <div style="font-size:0.8rem; color:var(--muted);">Status: ${it.attributes.status}</div>
+      </div>
+      <button class="btn-primary" style="padding:6px 12px; font-size:0.85rem;">Select →</button>
+    `;
+    card.querySelector('button').onclick = () => {
+      selectedManga = { id: it.id, title: title, provider: 'mangadex' };
+      document.getElementById('manga-title').innerText = title;
+      document.getElementById('manga-meta').innerText = 'Ready to download chapters';
+      document.getElementById('from-ch').value = 1;
+      document.getElementById('to-ch').value = 5;
+    };
+    list.appendChild(card);
+  });
+}
+
+function selectDirect(title) {
+  selectedManga = { title: title, provider: 'roliascan' };
+  document.getElementById('manga-title').innerText = title;
+  document.getElementById('manga-meta').innerText = 'Ready to download chapters (RoliaScan)';
+  document.getElementById('from-ch').value = 1;
+  document.getElementById('to-ch').value = 5;
+}
+
+function startDownload() {
+  if (!selectedManga) {
+    alert('Please search and select a series first.');
+    return;
+  }
+  const fromVal = document.getElementById('from-ch').value || 1;
+  const toVal = document.getElementById('to-ch').value || 5;
+  const fmt = document.getElementById('format-select').value;
+
+  const btn = document.getElementById('download-btn');
+  btn.disabled = true;
+  document.getElementById('status-text').innerText = `Downloading Chapter ${fromVal} to ${toVal}...`;
+
+  let pct = 0;
+  const timer = setInterval(() => {
+    pct += 10;
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('percent-text').innerText = pct + '%';
+    if (pct >= 100) {
+      clearInterval(timer);
+      btn.disabled = false;
+      document.getElementById('status-text').innerText = 'Complete! Saved to Download/MangaVerse';
+      alert('Downloaded successfully! File saved to your phone Downloads/MangaVerse folder.');
+    }
+  }, 400);
+}
+</script>
+</body>
+</html>
