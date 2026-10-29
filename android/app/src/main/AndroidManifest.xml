@@ -10,7 +10,7 @@
         android:allowBackup="true"
         android:label="MangaVerse"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar"
+        android:theme="@style/Theme.MangaVerse"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"

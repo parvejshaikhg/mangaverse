@@ -26,21 +26,23 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.5'
 
       - name: Build APK with Gradle
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
         run: |
           cd android
-          gradle assembleDebug --no-daemon
+          gradle assembleDebug --no-daemon --stacktrace
 
       - name: Copy & Rename APK
         run: |
           mkdir -p release_bin
           cp android/app/build/outputs/apk/debug/*.apk release_bin/MangaVerse.apk
+          ls -la release_bin
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
