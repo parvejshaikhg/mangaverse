@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mangaverse-downloader"
+version = "2.0.0"
+description = "Universal multi-threaded Manga and Manhwa Downloader with Desktop GUI, Web UI, and CLI for Windows, macOS, Linux, and Android."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "parvejshaikhg", email = "parvejshaikhg@gmail.com" }
+]
+keywords = ["manga", "manhwa", "downloader", "webtoon", "cbz", "pdf", "reader", "cross-platform"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Environment :: X11 Applications",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: MacOS X",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Multimedia :: Graphics",
+]
+dependencies = [
+    "requests>=2.31.0",
+    "pillow>=10.0.0",
+    "beautifulsoup4>=4.12.0",
+    "customtkinter>=5.2.0; platform_system != 'Android'",
+]
+
+[project.optional-dependencies]
+gui = ["customtkinter>=5.2.0"]
+
+[project.scripts]
+mangaverse = "main:main"
+
+[project.urls]
+"Homepage" = "https://github.com/parvejshaikhg/mangaverse"
+"Bug Tracker" = "https://github.com/parvejshaikhg/mangaverse/issues"
