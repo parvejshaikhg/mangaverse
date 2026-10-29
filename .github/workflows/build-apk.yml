@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build & Release Android APK
 
 on:
   workflow_dispatch:
@@ -6,9 +6,12 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build-android:
-    name: Build Android APK (Buildozer)
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
@@ -29,20 +32,32 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev cython3
+          sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
 
       - name: Install Buildozer & Dependencies
         run: |
           pip install --upgrade pip
-          pip install --upgrade buildozer cython virtualenv
+          pip install --upgrade "buildozer>=1.5.0" "cython<3.0" virtualenv
 
       - name: Build APK with Buildozer
         run: |
           buildozer android debug
+          mkdir -p release_bin
+          cp bin/*.apk release_bin/MangaVerse.apk
 
-      - name: Upload APK Artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: MangaVerse-Android-APK
-          path: bin/*.apk
+          path: release_bin/MangaVerse.apk
           retention-days: 30
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release_bin/MangaVerse.apk
+          name: MangaVerse Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
