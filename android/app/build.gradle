@@ -14,14 +14,28 @@ android {
         versionName "2.0.0"
     }
 
+    signingConfigs {
+        release {
+            def keystoreFile = file('release.jks')
+            if (keystoreFile.exists()) {
+                storeFile keystoreFile
+                storePassword 'mangaverse'
+                keyAlias 'mangaverse'
+                keyPassword 'mangaverse'
+                v1SigningEnabled true
+                v2SigningEnabled true
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            applicationIdSuffix ""
-            debuggable true
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
