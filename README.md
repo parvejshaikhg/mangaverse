@@ -144,39 +144,3 @@ python main.py download "Solo Leveling" --range 1-10 --format pdf
 # Launch the zero-dependency Web UI
 python main.py --web --port 5000
 ```
-
----
-
-## 🧪 Automated Testing
-
-Verify providers, scraping, and CBZ/PDF packaging across all platforms:
-
-```bash
-python test_downloader.py
-```
-
----
-
-## 📤 How to Publish to GitHub (Step-by-Step)
-
-1. **Create a new repository on GitHub**:
-   - Go to [github.com/new](https://github.com/new).
-   - Name it `mangaverse` (or any name you prefer).
-   - Leave "Initialize with README" **unchecked** (we already have a complete one).
-
-2. **Initialize Git and Push**:
-   ```bash
-   cd manga_downloader
-   git init
-   git add .
-   git commit -m "feat: initial cross-platform release v2.0"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/mangaverse.git
-   git push -u origin main
-   ```
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
