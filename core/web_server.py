@@ -58,6 +58,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MangaVerse Web — Cross-Platform Downloader</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#7C3AED">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MangaVerse">
 <style>
 :root {
   --bg: #0B0E14;
@@ -247,7 +253,10 @@ button {
 <body>
 <div class="header">
   <div class="brand">📚 MANGA VERSE <span class="badge">CROSS-PLATFORM</span></div>
-  <div class="platform-tag" id="platform-label">⚡ Multi-Platform Engine</div>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <button class="badge" id="install-btn" style="display:none; cursor:pointer; background:#10B981; border:none; padding:5px 12px;" onclick="installApp()">📲 Install App</button>
+    <div class="platform-tag" id="platform-label">⚡ Multi-Platform Engine</div>
+  </div>
 </div>
 
 <div class="search-card">
@@ -332,6 +341,25 @@ button {
 <script>
 let activeManga = null;
 let activeChapters = [];
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('install-btn');
+  if (btn) btn.style.display = 'inline-block';
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      const btn = document.getElementById('install-btn');
+      if (btn) btn.style.display = 'none';
+      deferredPrompt = null;
+    });
+  }
+}
 
 async function init() {
   const res = await fetch('/api/init');
@@ -504,6 +532,25 @@ class MangaVerseHandler(http.server.BaseHTTPRequestHandler):
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
             self.wfile.write(HTML_TEMPLATE.encode("utf-8"))
+            return
+
+        elif path == "/manifest.json":
+            manifest = {
+                "name": "MangaVerse - Manga & Manhwa Downloader",
+                "short_name": "MangaVerse",
+                "start_url": "/",
+                "display": "standalone",
+                "background_color": "#0B0E14",
+                "theme_color": "#7C3AED",
+                "icons": [
+                    {
+                        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237C3AED'/><text x='50%' y='55%' font-size='50' text-anchor='middle' dominant-baseline='middle' fill='white'>📚</text></svg>",
+                        "sizes": "192x192 512x512",
+                        "type": "image/svg+xml",
+                    }
+                ],
+            }
+            self._send_json(manifest)
             return
 
         elif path == "/api/init":
