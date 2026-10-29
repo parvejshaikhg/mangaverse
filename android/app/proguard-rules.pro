@@ -1,0 +1,2 @@
+# MangaVerse Proguard Rules
+-dontwarn **

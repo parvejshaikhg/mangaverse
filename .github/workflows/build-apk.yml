@@ -35,6 +35,7 @@ jobs:
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
         run: |
+          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
           cd android
           gradle assembleDebug --no-daemon --stacktrace
 
