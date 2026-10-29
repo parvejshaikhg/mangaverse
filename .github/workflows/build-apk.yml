@@ -12,7 +12,7 @@ permissions:
 jobs:
   build-android:
     name: Build Android APK
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout Repository
@@ -29,15 +29,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install System Dependencies
+      - name: Install System Dependencies (Ubuntu 22.04)
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev python3-pip
 
       - name: Install Buildozer & Dependencies
         run: |
-          pip install --upgrade pip
-          pip install --upgrade "buildozer>=1.5.0" "cython<3.0" virtualenv
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade "buildozer>=1.5.0" "cython<3.0" virtualenv
 
       - name: Build APK with Buildozer
         run: |
