@@ -75,6 +75,15 @@ class MangaVerseApp(ctk.CTk):
         self.minsize(1020, 700)
         self.configure(fg_color=PALETTE["bg"])
 
+        # Set Window Icon
+        assets_dir = Path(__file__).parent.parent / "assets"
+        icon_path = assets_dir / "app_icon.ico"
+        if icon_path.exists():
+            try:
+                self.iconbitmap(str(icon_path))
+            except Exception:
+                pass
+
         # State variables
         self.providers_map = list_providers()
         self.current_provider_key = "roliascan"
@@ -95,6 +104,13 @@ class MangaVerseApp(ctk.CTk):
 
     def _create_placeholder_cover(self) -> ctk.CTkImage:
         """Generates an aesthetic placeholder cover image for anime/manhwa series."""
+        logo_path = Path(__file__).parent.parent / "assets" / "app_icon.png"
+        if logo_path.exists():
+            try:
+                img = Image.open(logo_path).resize((110, 160), Image.Resampling.LANCZOS)
+                return ctk.CTkImage(light_image=img, dark_image=img, size=(110, 160))
+            except Exception:
+                pass
         img = Image.new("RGB", (110, 160), color="#1A202E")
         draw = ImageDraw.Draw(img)
         draw.rectangle([6, 6, 103, 153], outline="#2A344A", width=2)
@@ -119,15 +135,29 @@ class MangaVerseApp(ctk.CTk):
             height=65,
         )
         header_frame.grid(row=0, column=0, sticky="ew", padx=0, pady=0)
-        header_frame.grid_columnconfigure(1, weight=1)
+        header_frame.grid_columnconfigure(3, weight=1)
+
+        # App logo icon
+        logo_path = Path(__file__).parent.parent / "assets" / "logo_64.png"
+        col_idx = 0
+        if logo_path.exists():
+            try:
+                logo_img = Image.open(logo_path)
+                self.app_logo_image = ctk.CTkImage(light_image=logo_img, dark_image=logo_img, size=(34, 34))
+                logo_label = ctk.CTkLabel(header_frame, text="", image=self.app_logo_image)
+                logo_label.grid(row=0, column=col_idx, padx=(18, 0), pady=12, sticky="w")
+                col_idx += 1
+            except Exception:
+                pass
 
         brand_badge = ctk.CTkLabel(
             header_frame,
-            text="📚 MANGA VERSE",
+            text="MANGA VERSE",
             font=ctk.CTkFont(size=20, weight="bold"),
             text_color=PALETTE["purple_soft"],
         )
-        brand_badge.grid(row=0, column=0, padx=(22, 10), pady=14, sticky="w")
+        brand_badge.grid(row=0, column=col_idx, padx=(10, 8), pady=14, sticky="w")
+        col_idx += 1
 
         pro_pill = ctk.CTkLabel(
             header_frame,
@@ -139,7 +169,7 @@ class MangaVerseApp(ctk.CTk):
             padx=8,
             pady=2,
         )
-        pro_pill.grid(row=0, column=0, padx=(165, 0), pady=14, sticky="w")
+        pro_pill.grid(row=0, column=col_idx, padx=(0, 10), pady=14, sticky="w")
 
         subtitle_label = ctk.CTkLabel(
             header_frame,

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/app_icon.png" width="130" height="130" alt="MangaVerse App Icon" style="border-radius: 24px; box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);" />
+</p>
+
 # 📚 MangaVerse — Universal Manga & Manhwa Downloader
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)

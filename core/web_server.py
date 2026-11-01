@@ -58,6 +58,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MangaVerse Web — Cross-Platform Downloader</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#7C3AED">
 <meta name="mobile-web-app-capable" content="yes">
@@ -382,7 +383,11 @@ button {
 </head>
 <body>
 <div class="header">
-  <div class="brand">📚 MANGA VERSE <span class="badge">CROSS-PLATFORM</span></div>
+  <div class="brand">
+    <img src="/assets/logo_64.png" alt="Logo" style="width:34px; height:34px; border-radius:8px; object-fit:cover; border:1px solid var(--purple);">
+    <span>MANGA VERSE</span>
+    <span class="badge">CROSS-PLATFORM</span>
+  </div>
   <div style="display:flex; gap:8px; align-items:center;">
     <button class="badge" id="install-btn" style="display:none; cursor:pointer; background:#10B981; border:none; padding:5px 12px;" onclick="installApp()">📲 Install App</button>
     <div class="platform-tag" id="platform-label">⚡ Multi-Platform Engine</div>
@@ -848,6 +853,32 @@ class MangaVerseHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(HTML_TEMPLATE.encode("utf-8"))
             return
 
+        elif path == "/favicon.ico":
+            icon_path = Path(__file__).parent.parent / "assets" / "favicon.ico"
+            if icon_path.exists():
+                self.send_response(200)
+                self.send_header("Content-Type", "image/x-icon")
+                self.send_header("Content-Length", str(icon_path.stat().st_size))
+                self.end_headers()
+                self.wfile.write(icon_path.read_bytes())
+                return
+
+        elif path.startswith("/assets/"):
+            filename = os.path.basename(path)
+            file_path = Path(__file__).parent.parent / "assets" / filename
+            if file_path.exists():
+                ctype = "image/png"
+                if filename.endswith(".ico"):
+                    ctype = "image/x-icon"
+                elif filename.endswith(".jpg") or filename.endswith(".jpeg"):
+                    ctype = "image/jpeg"
+                self.send_response(200)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Content-Length", str(file_path.stat().st_size))
+                self.end_headers()
+                self.wfile.write(file_path.read_bytes())
+                return
+
         elif path == "/manifest.json":
             manifest = {
                 "name": "MangaVerse - Manga & Manhwa Downloader",
@@ -858,10 +889,15 @@ class MangaVerseHandler(http.server.BaseHTTPRequestHandler):
                 "theme_color": "#7C3AED",
                 "icons": [
                     {
-                        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237C3AED'/><text x='50%' y='55%' font-size='50' text-anchor='middle' dominant-baseline='middle' fill='white'>📚</text></svg>",
-                        "sizes": "192x192 512x512",
-                        "type": "image/svg+xml",
-                    }
+                        "src": "/assets/logo_128.png",
+                        "sizes": "128x128",
+                        "type": "image/png",
+                    },
+                    {
+                        "src": "/assets/app_icon.png",
+                        "sizes": "512x512",
+                        "type": "image/png",
+                    },
                 ],
             }
             self._send_json(manifest)
