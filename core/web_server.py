@@ -248,6 +248,136 @@ button {
   white-space: pre-wrap;
 }
 .chips-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.tabs-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 12px;
+}
+.tab-btn {
+  background: var(--card);
+  color: var(--muted);
+  border: 1px solid var(--card-border);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tab-btn.active {
+  background: var(--purple);
+  color: #fff;
+  border-color: var(--purple);
+}
+.anime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+.anime-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.anime-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--purple);
+}
+.anime-card-img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  background: #111;
+}
+.anime-card-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.anime-card-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+.anime-badge-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.badge-score {
+  background: #065F46;
+  color: #34D399;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.badge-ep {
+  background: #3730A3;
+  color: #A5B4FC;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.badge-status {
+  background: #1E293B;
+  color: #94A3B8;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+.modal-content {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--inner);
+  border: 1px solid var(--card-border);
+  color: var(--text);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+}
 </style>
 </head>
 <body>
@@ -259,82 +389,119 @@ button {
   </div>
 </div>
 
-<div class="search-card">
-  <div class="search-row">
-    <select id="source-select"></select>
-    <input type="text" id="search-input" placeholder="Search title (e.g. Nano Machine, Solo Leveling) or paste URL...">
-    <button class="btn-primary" onclick="triggerSearch()">🔍 Search</button>
+<div class="tabs-nav">
+  <button id="tab-btn-manga" class="tab-btn active" onclick="switchTab('manga')">📚 Manga &amp; Manhwa Downloader</button>
+  <button id="tab-btn-anime" class="tab-btn" onclick="switchTab('anime')">🎬 Anime Explorer &amp; Guide</button>
+</div>
+
+<!-- ================= MANGA SECTION ================= -->
+<div id="manga-section">
+  <div class="search-card">
+    <div class="search-row">
+      <select id="source-select"></select>
+      <input type="text" id="search-input" placeholder="Search title (e.g. Nano Machine, Solo Leveling) or paste URL...">
+      <button class="btn-primary" onclick="triggerSearch()">🔍 Search</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Left Column: Search Results -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>Catalog Results</span>
+        <span class="badge" id="results-count">0 found</span>
+      </div>
+      <div class="results-list" id="results-list">
+        <p style="color:var(--muted); text-align:center; padding: 30px;">Search for any title to browse chapters!</p>
+      </div>
+    </div>
+
+    <!-- Right Column: Series Showcase & Controls -->
+    <div class="panel">
+      <div class="panel-title">Download Configuration</div>
+      <div class="showcase">
+        <img id="manga-cover" class="cover-thumb" src="" alt="Cover" style="display:none;">
+        <div class="showcase-details">
+          <h3 id="manga-title">No Series Selected</h3>
+          <p id="manga-meta" style="font-size:0.85rem; color:var(--muted); margin: 6px 0;">Select a series from the left to load chapters.</p>
+          <span class="badge" id="manga-chapters-badge" style="display:none;">0 Chapters</span>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:0.8rem; color:var(--muted); font-weight:700;">DOWNLOAD SCOPE</label>
+        <div class="chips-row" style="margin: 6px 0 10px 0;">
+          <button class="btn-chip" onclick="setScope('first5')">⚡ First 5</button>
+          <button class="btn-chip" onclick="setScope('latest10')">🔥 Latest 10</button>
+          <button class="btn-chip" onclick="setScope('all')">📦 All</button>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <input type="number" id="from-ch" placeholder="From Ch" style="width:50%;">
+          <input type="number" id="to-ch" placeholder="To Ch" style="width:50%;">
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:0.8rem; color:var(--muted); font-weight:700;">OUTPUT FORMAT</label>
+        <select id="format-select" style="width:100%; margin-top:4px;">
+          <option value="cbz">CBZ (Comic Reader)</option>
+          <option value="pdf">PDF (Document)</option>
+          <option value="images">Images (Folder)</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="font-size:0.8rem; color:var(--muted); font-weight:700;">SAVE DESTINATION</label>
+        <input type="text" id="dest-path" style="width:100%; margin-top:4px;">
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn-emerald" id="start-btn" onclick="startDownload()">🚀 START DOWNLOAD</button>
+        <button class="btn-rose" id="cancel-btn" onclick="cancelDownload()" style="display:none;">⏹ Cancel</button>
+      </div>
+
+      <!-- Live Telemetry -->
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
+          <span id="status-text">Status: Idle</span>
+          <span id="percent-text">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+      </div>
+
+      <div class="terminal" id="terminal-feed">MangaVerse Web Engine ready.</div>
+    </div>
   </div>
 </div>
 
-<div class="grid">
-  <!-- Left Column: Search Results -->
-  <div class="panel">
-    <div class="panel-title">
-      <span>Catalog Results</span>
-      <span class="badge" id="results-count">0 found</span>
-    </div>
-    <div class="results-list" id="results-list">
-      <p style="color:var(--muted); text-align:center; padding: 30px;">Search for any title to browse chapters!</p>
+<!-- ================= ANIME SECTION ================= -->
+<div id="anime-section" style="display:none;">
+  <div class="search-card">
+    <div class="search-row">
+      <input type="text" id="anime-search-input" placeholder="Search anime title (e.g. Solo Leveling, Attack on Titan, Demon Slayer)..." onkeypress="if(event.key==='Enter')triggerAnimeSearch()">
+      <button class="btn-primary" onclick="triggerAnimeSearch()">🔍 Search Anime</button>
+      <button class="btn-chip" onclick="loadTrendingAnime()" style="background:var(--purple); color:#fff; padding:10px 16px;">🔥 Top Trending</button>
     </div>
   </div>
 
-  <!-- Right Column: Series Showcase & Controls -->
   <div class="panel">
-    <div class="panel-title">Download Configuration</div>
-    <div class="showcase">
-      <img id="manga-cover" class="cover-thumb" src="" alt="Cover" style="display:none;">
-      <div class="showcase-details">
-        <h3 id="manga-title">No Series Selected</h3>
-        <p id="manga-meta" style="font-size:0.85rem; color:var(--muted); margin: 6px 0;">Select a series from the left to load chapters.</p>
-        <span class="badge" id="manga-chapters-badge" style="display:none;">0 Chapters</span>
-      </div>
+    <div class="panel-title">
+      <span id="anime-heading">Top Trending Anime</span>
+      <span class="badge" id="anime-count">0 items</span>
     </div>
-
-    <div>
-      <label style="font-size:0.8rem; color:var(--muted); font-weight:700;">DOWNLOAD SCOPE</label>
-      <div class="chips-row" style="margin: 6px 0 10px 0;">
-        <button class="btn-chip" onclick="setScope('first5')">⚡ First 5</button>
-        <button class="btn-chip" onclick="setScope('latest10')">🔥 Latest 10</button>
-        <button class="btn-chip" onclick="setScope('all')">📦 All</button>
-      </div>
-      <div style="display:flex; gap:10px;">
-        <input type="number" id="from-ch" placeholder="From Ch" style="width:50%;">
-        <input type="number" id="to-ch" placeholder="To Ch" style="width:50%;">
-      </div>
+    <div class="anime-grid" id="anime-results">
+      <p style="color:var(--muted); text-align:center; padding: 40px; grid-column: 1/-1;">Loading trending anime...</p>
     </div>
+  </div>
+</div>
 
-    <div>
-      <label style="font-size:0.8rem; color:var(--muted); font-weight:700;">OUTPUT FORMAT</label>
-      <select id="format-select" style="width:100%; margin-top:4px;">
-        <option value="cbz">CBZ (Comic Reader)</option>
-        <option value="pdf">PDF (Document)</option>
-        <option value="images">Images (Folder)</option>
-      </select>
-    </div>
-
-    <div>
-      <label style="font-size:0.8rem; color:var(--muted); font-weight:700;">SAVE DESTINATION</label>
-      <input type="text" id="dest-path" style="width:100%; margin-top:4px;">
-    </div>
-
-    <div style="display:flex; gap:10px;">
-      <button class="btn-emerald" id="start-btn" onclick="startDownload()">🚀 START DOWNLOAD</button>
-      <button class="btn-rose" id="cancel-btn" onclick="cancelDownload()" style="display:none;">⏹ Cancel</button>
-    </div>
-
-    <!-- Live Telemetry -->
-    <div>
-      <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
-        <span id="status-text">Status: Idle</span>
-        <span id="percent-text">0%</span>
-      </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progress-bar"></div>
-      </div>
-    </div>
-
-    <div class="terminal" id="terminal-feed">MangaVerse Web Engine ready.</div>
+<!-- ================= ANIME DETAILS MODAL ================= -->
+<div class="modal-overlay" id="anime-modal" onclick="if(event.target===this)closeAnimeModal()">
+  <div class="modal-content">
+    <div class="modal-close" onclick="closeAnimeModal()">✕</div>
+    <div id="anime-modal-body"></div>
   </div>
 </div>
 
@@ -508,6 +675,153 @@ async function pollProgress() {
   } catch (e) {}
 }
 
+// ================= ANIME MODULE JAVASCRIPT =================
+function switchTab(tab) {
+  const mangaBtn = document.getElementById('tab-btn-manga');
+  const animeBtn = document.getElementById('tab-btn-anime');
+  const mangaSec = document.getElementById('manga-section');
+  const animeSec = document.getElementById('anime-section');
+
+  if (tab === 'anime') {
+    mangaBtn.classList.remove('active');
+    animeBtn.classList.add('active');
+    mangaSec.style.display = 'none';
+    animeSec.style.display = 'block';
+    if (!window.animeLoaded) {
+      loadTrendingAnime();
+      window.animeLoaded = true;
+    }
+  } else {
+    animeBtn.classList.remove('active');
+    mangaBtn.classList.add('active');
+    animeSec.style.display = 'none';
+    mangaSec.style.display = 'block';
+  }
+}
+
+async function loadTrendingAnime() {
+  document.getElementById('anime-heading').innerText = 'Top Trending Anime Globally';
+  document.getElementById('anime-results').innerHTML = '<p style="color:var(--muted); text-align:center; padding:40px; grid-column:1/-1;">Fetching trending anime from AniList...</p>';
+  try {
+    const res = await fetch('/api/anime/trending');
+    const items = await res.json();
+    renderAnimeCards(items);
+  } catch (e) {
+    document.getElementById('anime-results').innerHTML = '<p style="color:var(--rose); text-align:center; padding:40px; grid-column:1/-1;">Failed to load anime. Please try again.</p>';
+  }
+}
+
+async function triggerAnimeSearch() {
+  const q = document.getElementById('anime-search-input').value.trim();
+  if (!q) return;
+  document.getElementById('anime-heading').innerText = `Results for "${q}"`;
+  document.getElementById('anime-results').innerHTML = '<p style="color:var(--muted); text-align:center; padding:40px; grid-column:1/-1;">Searching anime catalog...</p>';
+  try {
+    const res = await fetch(`/api/anime/search?q=${encodeURIComponent(q)}`);
+    const items = await res.json();
+    renderAnimeCards(items);
+  } catch (e) {
+    document.getElementById('anime-results').innerHTML = '<p style="color:var(--rose); text-align:center; padding:40px; grid-column:1/-1;">Search error. Please try again.</p>';
+  }
+}
+
+function renderAnimeCards(items) {
+  const container = document.getElementById('anime-results');
+  document.getElementById('anime-count').innerText = `${items.length} items`;
+  container.innerHTML = '';
+  if (!items || items.length === 0) {
+    container.innerHTML = '<p style="color:var(--muted); text-align:center; padding:40px; grid-column:1/-1;">No anime found matching your search.</p>';
+    return;
+  }
+  items.forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'anime-card';
+    card.onclick = () => showAnimeDetails(a.id);
+    card.innerHTML = `
+      <img class="anime-card-img" src="${a.cover || ''}" alt="${a.title}" loading="lazy">
+      <div class="anime-card-body">
+        <div class="anime-card-title">${a.title}</div>
+        <div class="anime-badge-row">
+          <span class="badge-score">⭐ ${a.score}</span>
+          <span class="badge-ep">${a.episodes}</span>
+          <span class="badge-status">${a.format}</span>
+        </div>
+        <div style="font-size:0.75rem; color:var(--muted); margin-top:4px;">
+          ${a.genres ? a.genres.slice(0, 3).join(', ') : ''}
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+async function showAnimeDetails(id) {
+  const modal = document.getElementById('anime-modal');
+  const body = document.getElementById('anime-modal-body');
+  body.innerHTML = '<p style="color:var(--muted); text-align:center; padding:40px;">Loading anime details...</p>';
+  modal.style.display = 'flex';
+
+  try {
+    const res = await fetch(`/api/anime/info?id=${id}`);
+    const a = await res.json();
+    if (a.error) {
+      body.innerHTML = `<p style="color:var(--rose); text-align:center; padding:30px;">${a.error}</p>`;
+      return;
+    }
+
+    let linksHtml = '';
+    if (a.links && a.links.length) {
+      linksHtml = '<div style="margin-top:14px;"><label style="font-size:0.8rem; color:var(--muted); font-weight:700;">OFFICIAL & STREAMING PLATFORMS</label><div class="chips-row" style="margin-top:6px;">' +
+        a.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener" class="btn-chip" style="text-decoration:none; color:#67E8F9;">🌐 ${l.site} ↗</a>`).join('') +
+        '</div></div>';
+    }
+
+    let trailerHtml = '';
+    if (a.trailer) {
+      trailerHtml = `<a href="${a.trailer}" target="_blank" rel="noopener" class="btn-chip" style="text-decoration:none; color:#F59E0B; margin-top:6px; display:inline-block;">▶ Watch Trailer on YouTube ↗</a>`;
+    }
+
+    body.innerHTML = `
+      <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        <img src="${a.cover}" style="width:140px; height:200px; border-radius:8px; object-fit:cover; border:1px solid var(--card-border);">
+        <div style="flex:1; min-width:220px;">
+          <h2 style="font-size:1.3rem; color:var(--text);">${a.title}</h2>
+          <p style="color:var(--muted); font-size:0.85rem; margin-top:2px;">${a.title_native || ''}</p>
+          <div class="anime-badge-row" style="margin: 10px 0;">
+            <span class="badge-score">⭐ Score: ${a.score}</span>
+            <span class="badge-ep">📺 ${a.episodes}</span>
+            <span class="badge-status">Status: ${a.status}</span>
+          </div>
+          <p style="font-size:0.85rem; color:var(--muted); line-height:1.4;">
+            <strong>Format:</strong> ${a.format} &bull; <strong>Year:</strong> ${a.year} &bull; <strong>Studio:</strong> ${a.studios ? a.studios.join(', ') : 'N/A'}
+          </p>
+          ${trailerHtml}
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <label style="font-size:0.8rem; color:var(--muted); font-weight:700;">GENRES</label>
+        <div style="color:var(--cyan); font-size:0.85rem; margin-top:4px;">${a.genres ? a.genres.join(' &bull; ') : 'N/A'}</div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <label style="font-size:0.8rem; color:var(--muted); font-weight:700;">SYNOPSIS</label>
+        <p style="font-size:0.88rem; color:var(--text); line-height:1.6; margin-top:4px; max-height:180px; overflow-y:auto; background:var(--inner); padding:10px; border-radius:6px;">
+          ${a.description || 'No description available.'}
+        </p>
+      </div>
+
+      ${linksHtml}
+    `;
+  } catch (e) {
+    body.innerHTML = '<p style="color:var(--rose); text-align:center; padding:30px;">Error loading details.</p>';
+  }
+}
+
+function closeAnimeModal() {
+  document.getElementById('anime-modal').style.display = 'none';
+}
+
 window.onload = init;
 </script>
 </body>
@@ -618,6 +932,96 @@ class MangaVerseHandler(http.server.BaseHTTPRequestHandler):
         elif path == "/api/progress":
             with WebState.lock:
                 self._send_json(WebState.latest_progress)
+            return
+
+        elif path == "/api/anime/search":
+            q = params.get("q", [""])[0]
+            try:
+                from .anime import AnimeService
+                results = AnimeService.search_anime(q, limit=12)
+                out = [
+                    {
+                        "id": a.id,
+                        "title": a.display_title,
+                        "title_native": a.title_native,
+                        "format": a.format,
+                        "status": a.status,
+                        "episodes": a.episodes_text,
+                        "year": a.year_text,
+                        "score": a.score_text,
+                        "genres": a.genres,
+                        "description": a.description,
+                        "cover": a.cover_image_large,
+                        "banner": a.banner_image,
+                        "trailer": a.trailer_url,
+                        "links": a.external_links,
+                    }
+                    for a in results
+                ]
+                self._send_json(out)
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+            return
+
+        elif path == "/api/anime/trending":
+            try:
+                from .anime import AnimeService
+                results = AnimeService.get_trending_anime(limit=12)
+                out = [
+                    {
+                        "id": a.id,
+                        "title": a.display_title,
+                        "title_native": a.title_native,
+                        "format": a.format,
+                        "status": a.status,
+                        "episodes": a.episodes_text,
+                        "year": a.year_text,
+                        "score": a.score_text,
+                        "genres": a.genres,
+                        "description": a.description,
+                        "cover": a.cover_image_large,
+                        "banner": a.banner_image,
+                        "trailer": a.trailer_url,
+                        "links": a.external_links,
+                    }
+                    for a in results
+                ]
+                self._send_json(out)
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
+            return
+
+        elif path == "/api/anime/info":
+            anime_id_str = params.get("id", [""])[0]
+            try:
+                from .anime import AnimeService
+                anime_id = int(anime_id_str)
+                a = AnimeService.get_anime_by_id(anime_id)
+                if not a:
+                    self._send_json({"error": "Anime not found"}, status=404)
+                    return
+                out = {
+                    "id": a.id,
+                    "title": a.display_title,
+                    "title_native": a.title_native,
+                    "format": a.format,
+                    "status": a.status,
+                    "episodes": a.episodes_text,
+                    "duration": a.duration,
+                    "year": a.year_text,
+                    "score": a.score_text,
+                    "genres": a.genres,
+                    "studios": a.studios,
+                    "description": a.description,
+                    "cover": a.cover_image_large,
+                    "banner": a.banner_image,
+                    "trailer": a.trailer_url,
+                    "next_episode": a.next_airing_episode,
+                    "links": a.external_links,
+                }
+                self._send_json(out)
+            except Exception as e:
+                self._send_json({"error": str(e)}, status=500)
             return
 
         self.send_error(404, "Not Found")

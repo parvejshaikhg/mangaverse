@@ -38,6 +38,10 @@ Chapters can be exported into standard digital comic formats (**CBZ** for e-read
   - **CBZ (Comic Book Zip)**: Compatible with Panels, CDisplayEx, YACReader.
   - **PDF**: Unified document with automatic color space conversion (RGB normalization via Pillow).
   - **Raw Images**: Sequential folder of high-resolution `.jpg` / `.png` / `.webp` panels.
+- **🎬 Anime Discovery & Episode Guide**:
+  - Search anime across global databases via AniList API.
+  - Instant access to total episode counts, ratings, studios, and genres.
+  - Track next episode airings, countdowns, YouTube trailers, and official streaming links (Crunchyroll, Netflix, etc.).
 
 ---
 
@@ -118,6 +122,16 @@ python main.py download "Nano Machine" --chapter 336 --format cbz
 # Download a range of chapters (e.g. 1 to 10) to PDF
 python main.py download "Solo Leveling" --range 1-10 --format pdf
 
-# Launch the zero-dependency Web UI
+# 🎬 Anime Commands
+# Search Anime series
+python main.py anime search "Attack on Titan"
+
+# View top trending anime globally
+python main.py anime trending
+
+# Detailed anime info & official streaming links
+python main.py anime info "Solo Leveling"
+
+# Launch the zero-dependency Web UI (with Manga & Anime tabs)
 python main.py --web --port 5000
 ```

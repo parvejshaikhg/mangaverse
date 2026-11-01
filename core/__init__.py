@@ -6,6 +6,7 @@ from .models import Manga, Chapter, DownloadOptions, ProgressUpdate
 from .downloader import MangaDownloader
 from .exporter import ChapterExporter
 from .providers import get_provider, list_providers, detect_provider_from_url
+from .anime import AnimeItem, AnimeService
 
 __all__ = [
     "Manga",
@@ -17,4 +18,6 @@ __all__ = [
     "get_provider",
     "list_providers",
     "detect_provider_from_url",
+    "AnimeItem",
+    "AnimeService",
 ]

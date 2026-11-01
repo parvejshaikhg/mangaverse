@@ -22,6 +22,7 @@ from core import (
     MangaDownloader,
     DownloadOptions,
     ProgressUpdate,
+    AnimeService,
 )
 from core.utils import get_default_download_dir
 
@@ -131,6 +132,77 @@ def handle_download(args):
     print(f"\n✨ All done! Successfully saved {len(completed)} file(s) in: {Path(args.output).resolve()}\n")
 
 
+def handle_anime(args):
+    """Executes anime search / trending / details via AniList API."""
+    if args.anime_action == "trending":
+        print("\n🔥 Fetching Top Trending Anime Globally...\n")
+        items = AnimeService.get_trending_anime(limit=args.limit)
+        if not items:
+            print("❌ Could not retrieve trending anime.")
+            return
+        print(f"{'#':<3} | {'ID':<8} | {'Title':<45} | {'Episodes':<15} | {'Score':<6} | {'Year'}")
+        print("-" * 95)
+        for idx, anime in enumerate(items, start=1):
+            title = anime.display_title[:42] + "..." if len(anime.display_title) > 42 else anime.display_title
+            print(f"{idx:<3} | {anime.id:<8} | {title:<45} | {anime.episodes_text:<15} | {anime.score_text:<6} | {anime.year_text}")
+        print()
+    elif args.anime_action == "info":
+        if not args.query:
+            print("❌ Please provide an anime ID or title: python main.py anime info <ID or Title>")
+            return
+        print(f"\n🔍 Fetching details for '{args.query}'...")
+        try:
+            anime_id = int(args.query)
+            anime = AnimeService.get_anime_by_id(anime_id)
+        except ValueError:
+            results = AnimeService.search_anime(args.query, limit=1)
+            anime = results[0] if results else None
+
+        if not anime:
+            print("❌ Anime not found.")
+            return
+
+        print(f"\n{'='*70}")
+        print(f"🎬 {anime.display_title} ({anime.title_native})")
+        print(f"{'='*70}")
+        print(f"• ID: {anime.id}")
+        print(f"• Format: {anime.format} | Status: {anime.status}")
+        print(f"• Episodes: {anime.episodes_text} ({anime.duration or '?'} min/ep)")
+        print(f"• Release: {anime.year_text}")
+        print(f"• Score: {anime.score_text}")
+        print(f"• Genres: {', '.join(anime.genres)}")
+        if anime.studios:
+            print(f"• Studio: {', '.join(anime.studios)}")
+        if anime.next_airing_episode:
+            print(f"• Next Episode: Episode {anime.next_airing_episode} airing soon")
+        if anime.trailer_url:
+            print(f"• Trailer: {anime.trailer_url}")
+        print(f"\n📖 Synopsis:\n{anime.description}")
+        if anime.external_links:
+            print(f"\n🌐 Official & Streaming Links:")
+            for link in anime.external_links[:6]:
+                print(f"  - {link['site']}: {link['url']}")
+        print(f"{'='*70}\n")
+    else:
+        # Default is search
+        query = args.query
+        if not query:
+            print("❌ Please provide a search query: python main.py anime search <title>")
+            return
+        print(f"\n🔎 Searching Anime for '{query}'...\n")
+        items = AnimeService.search_anime(query, limit=args.limit)
+        if not items:
+            print("❌ No matching anime found.")
+            return
+        print(f"Found {len(items)} matches:\n")
+        print(f"{'#':<3} | {'ID':<8} | {'Title':<45} | {'Episodes':<15} | {'Score':<6} | {'Year'}")
+        print("-" * 95)
+        for idx, anime in enumerate(items, start=1):
+            title = anime.display_title[:42] + "..." if len(anime.display_title) > 42 else anime.display_title
+            print(f"{idx:<3} | {anime.id:<8} | {title:<45} | {anime.episodes_text:<15} | {anime.score_text:<6} | {anime.year_text}")
+        print(f"\n💡 Tip: Run 'python main.py anime info <ID>' for full synopsis, episodes & links.\n")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="MangaVerse CLI — High-performance Manga & Manhwa Downloader",
@@ -180,6 +252,18 @@ def main():
         help="Concurrent download threads (default: 4)",
     )
 
+    # Anime command
+    anime_parser = subparsers.add_parser("anime", help="Search and explore anime series, episodes & airing guides")
+    anime_parser.add_argument(
+        "anime_action",
+        choices=["search", "trending", "info"],
+        default="search",
+        nargs="?",
+        help="Action: search (default), trending, or info",
+    )
+    anime_parser.add_argument("query", nargs="?", default="", help="Anime title or ID")
+    anime_parser.add_argument("--limit", type=int, default=10, help="Number of results (default: 10)")
+
     args = parser.parse_args()
 
     if args.command == "sources":
@@ -191,6 +275,8 @@ def main():
         handle_search(args)
     elif args.command == "download":
         handle_download(args)
+    elif args.command == "anime":
+        handle_anime(args)
     else:
         parser.print_help()
 

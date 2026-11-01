@@ -37,8 +37,8 @@ def main():
         start_web_ui(port=port)
         return
 
-    # Check for CLI commands (search, download, sources, etc.)
-    cli_commands = ["search", "download", "sources", "--help", "-h"]
+    # Check for CLI commands (search, download, sources, anime, etc.)
+    cli_commands = ["search", "download", "sources", "anime", "--help", "-h"]
     if any(cmd in args for cmd in cli_commands):
         from cli import main as cli_main
         cli_main()

@@ -20,6 +20,7 @@ from core import (
     list_providers,
     DownloadOptions,
     MangaDownloader,
+    AnimeService,
 )
 
 
@@ -122,6 +123,23 @@ class TestMangaVerse(unittest.TestCase):
         self.assertTrue(exported_path.name.endswith(".pdf"))
         self.assertGreater(exported_path.stat().st_size, 1024)
         print(f"[Test] PDF Verified successfully! Size: {exported_path.stat().st_size // 1024} KB\n")
+
+    def test_06_anime_search(self):
+        """Tests AniList anime search."""
+        results = AnimeService.search_anime("Attack on Titan", limit=3)
+        self.assertGreater(len(results), 0, "Should find at least 1 anime for Attack on Titan")
+        self.assertTrue(len(results[0].display_title) > 0)
+        self.assertIsNotNone(results[0].id)
+        print(f"[Test] Anime Search Verified: '{results[0].display_title}' (Episodes: {results[0].episodes_text})")
+
+    def test_07_anime_details(self):
+        """Tests fetching detailed anime guide metadata by ID."""
+        anime = AnimeService.get_anime_by_id(151807)  # Solo Leveling
+        self.assertIsNotNone(anime)
+        self.assertEqual(anime.id, 151807)
+        self.assertIn("Solo Leveling", anime.display_title)
+        self.assertGreater(len(anime.genres), 0)
+        print(f"[Test] Anime Details Verified: '{anime.display_title}' ({anime.score_text}, {anime.episodes_text})\n")
 
 
 if __name__ == "__main__":
