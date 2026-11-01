@@ -71,8 +71,8 @@ class MangaVerseApp(ctk.CTk):
         # Window & theme setup
         ctk.set_appearance_mode("dark")
         self.title("MangaVerse — Manga & Manhwa Downloader")
-        self.geometry("1160x780")
-        self.minsize(1020, 700)
+        self.geometry("1200x820")
+        self.minsize(1040, 680)
         self.configure(fg_color=PALETTE["bg"])
 
         # Set Window Icon
@@ -107,16 +107,16 @@ class MangaVerseApp(ctk.CTk):
         logo_path = Path(__file__).parent.parent / "assets" / "app_icon.png"
         if logo_path.exists():
             try:
-                img = Image.open(logo_path).resize((110, 160), Image.Resampling.LANCZOS)
-                return ctk.CTkImage(light_image=img, dark_image=img, size=(110, 160))
+                img = Image.open(logo_path).resize((95, 135), Image.Resampling.LANCZOS)
+                return ctk.CTkImage(light_image=img, dark_image=img, size=(95, 135))
             except Exception:
                 pass
-        img = Image.new("RGB", (110, 160), color="#1A202E")
+        img = Image.new("RGB", (95, 135), color="#1A202E")
         draw = ImageDraw.Draw(img)
-        draw.rectangle([6, 6, 103, 153], outline="#2A344A", width=2)
-        draw.text((28, 65), "MANGA", fill="#7C3AED")
-        draw.text((29, 85), "VERSE", fill="#06B6D4")
-        return ctk.CTkImage(light_image=img, dark_image=img, size=(110, 160))
+        draw.rectangle([5, 5, 89, 129], outline="#2A344A", width=2)
+        draw.text((22, 50), "MANGA", fill="#7C3AED")
+        draw.text((23, 70), "VERSE", fill="#06B6D4")
+        return ctk.CTkImage(light_image=img, dark_image=img, size=(95, 135))
 
     def _build_ui(self):
         """Constructs the application layout."""
@@ -276,10 +276,11 @@ class MangaVerseApp(ctk.CTk):
         # 3. Main Split Workspace (Left = Results, Right = Selected Series & Config)
         # ----------------------------------------------------
         workspace = ctk.CTkFrame(self, fg_color="transparent")
-        workspace.grid(row=2, column=0, sticky="nsew", padx=20, pady=(0, 12))
+        workspace.grid(row=2, column=0, sticky="nsew", padx=20, pady=(0, 10))
         workspace.grid_columnconfigure(0, weight=5)  # Results
         workspace.grid_columnconfigure(1, weight=6)  # Config & Showcase
-        workspace.grid_rowconfigure(0, weight=1)
+        workspace.grid_rowconfigure(0, weight=1)     # Scrollable config
+        workspace.grid_rowconfigure(1, weight=0)     # Fixed actions frame
 
         # ----------------------------------------
         # Left: Search Results Container
@@ -291,12 +292,12 @@ class MangaVerseApp(ctk.CTk):
             border_width=1,
             border_color=PALETTE["card_border"],
         )
-        results_container.grid(row=0, column=0, sticky="nsew", padx=(0, 10), pady=0)
+        results_container.grid(row=0, column=0, rowspan=2, sticky="nsew", padx=(0, 10), pady=0)
         results_container.grid_rowconfigure(1, weight=1)
         results_container.grid_columnconfigure(0, weight=1)
 
         results_header_frame = ctk.CTkFrame(results_container, fg_color="transparent")
-        results_header_frame.grid(row=0, column=0, sticky="ew", padx=16, pady=(14, 8))
+        results_header_frame.grid(row=0, column=0, sticky="ew", padx=16, pady=(12, 6))
         results_header_frame.grid_columnconfigure(0, weight=1)
 
         self.results_title_lbl = ctk.CTkLabel(
@@ -325,7 +326,7 @@ class MangaVerseApp(ctk.CTk):
             scrollbar_button_color=PALETTE["card_border"],
             scrollbar_button_hover_color=PALETTE["purple"],
         )
-        self.results_scroll.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 12))
+        self.results_scroll.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
         self.results_scroll.grid_columnconfigure(0, weight=1)
 
         self._show_empty_placeholder("Search for any manga or manhwa title above to browse!")
@@ -333,25 +334,27 @@ class MangaVerseApp(ctk.CTk):
         # ----------------------------------------
         # Right: Selected Series Details & Download Control Center
         # ----------------------------------------
-        config_container = ctk.CTkFrame(
+        config_scroll = ctk.CTkScrollableFrame(
             workspace,
             corner_radius=14,
             fg_color=PALETTE["card_bg"],
             border_width=1,
             border_color=PALETTE["card_border"],
+            scrollbar_button_color=PALETTE["card_border"],
+            scrollbar_button_hover_color=PALETTE["purple"],
         )
-        config_container.grid(row=0, column=1, sticky="nsew", padx=(0, 0), pady=0)
-        config_container.grid_columnconfigure(0, weight=1)
+        config_scroll.grid(row=0, column=1, sticky="nsew", padx=(0, 0), pady=(0, 8))
+        config_scroll.grid_columnconfigure(0, weight=1)
 
         # 3.1 Series Showcase Card (With Cover Art Preview!)
         self.showcase_frame = ctk.CTkFrame(
-            config_container,
+            config_scroll,
             corner_radius=12,
             fg_color=PALETTE["inner_bg"],
             border_width=1,
             border_color=PALETTE["card_border"],
         )
-        self.showcase_frame.grid(row=0, column=0, sticky="ew", padx=16, pady=(16, 12))
+        self.showcase_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 8))
         self.showcase_frame.grid_columnconfigure(1, weight=1)
 
         # Cover Thumbnail
@@ -361,23 +364,23 @@ class MangaVerseApp(ctk.CTk):
             text="",
             corner_radius=8,
         )
-        self.cover_label.grid(row=0, column=0, rowspan=4, padx=(14, 16), pady=14, sticky="nw")
+        self.cover_label.grid(row=0, column=0, rowspan=4, padx=(12, 14), pady=12, sticky="nw")
 
         # Title & Badges
         self.series_title_label = ctk.CTkLabel(
             self.showcase_frame,
             text="No Series Selected",
-            font=ctk.CTkFont(size=18, weight="bold"),
+            font=ctk.CTkFont(size=17, weight="bold"),
             text_color=PALETTE["text_white"],
             anchor="w",
             wraplength=340,
             justify="left",
         )
-        self.series_title_label.grid(row=0, column=1, sticky="nw", padx=(0, 14), pady=(14, 4))
+        self.series_title_label.grid(row=0, column=1, sticky="nw", padx=(0, 12), pady=(12, 3))
 
         # Badges Row
         self.badges_frame = ctk.CTkFrame(self.showcase_frame, fg_color="transparent")
-        self.badges_frame.grid(row=1, column=1, sticky="w", padx=(0, 14), pady=(0, 6))
+        self.badges_frame.grid(row=1, column=1, sticky="w", padx=(0, 12), pady=(0, 4))
 
         self.source_badge = ctk.CTkLabel(
             self.badges_frame,
@@ -412,17 +415,17 @@ class MangaVerseApp(ctk.CTk):
             wraplength=340,
             justify="left",
         )
-        self.series_meta_label.grid(row=2, column=1, sticky="nw", padx=(0, 14), pady=(0, 10))
+        self.series_meta_label.grid(row=2, column=1, sticky="nw", padx=(0, 12), pady=(0, 8))
 
         # 3.2 Download Scope & Range Controls
         scope_card = ctk.CTkFrame(
-            config_container,
+            config_scroll,
             fg_color=PALETTE["inner_bg"],
             corner_radius=10,
             border_width=1,
             border_color=PALETTE["card_border"],
         )
-        scope_card.grid(row=1, column=0, sticky="ew", padx=16, pady=(0, 10))
+        scope_card.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 8))
         scope_card.grid_columnconfigure(0, weight=1)
 
         scope_header = ctk.CTkLabel(
@@ -431,7 +434,7 @@ class MangaVerseApp(ctk.CTk):
             font=ctk.CTkFont(size=10, weight="bold"),
             text_color=PALETTE["cyan_soft"],
         )
-        scope_header.grid(row=0, column=0, sticky="w", padx=14, pady=(10, 4))
+        scope_header.grid(row=0, column=0, sticky="w", padx=12, pady=(8, 3))
 
         self.scope_segmented = ctk.CTkSegmentedButton(
             scope_card,
@@ -444,11 +447,11 @@ class MangaVerseApp(ctk.CTk):
             font=ctk.CTkFont(size=12, weight="bold"),
         )
         self.scope_segmented.set("Range")
-        self.scope_segmented.grid(row=1, column=0, sticky="ew", padx=14, pady=(0, 8))
+        self.scope_segmented.grid(row=1, column=0, sticky="ew", padx=12, pady=(0, 6))
 
         # Range Inputs & Quick Preset Chips
         self.range_panel = ctk.CTkFrame(scope_card, fg_color="transparent")
-        self.range_panel.grid(row=2, column=0, sticky="ew", padx=14, pady=(0, 10))
+        self.range_panel.grid(row=2, column=0, sticky="ew", padx=12, pady=(0, 8))
 
         lbl_from = ctk.CTkLabel(self.range_panel, text="From:", font=ctk.CTkFont(size=12, weight="bold"), text_color=PALETTE["text_muted"])
         lbl_from.pack(side="left", padx=(0, 6))
@@ -517,13 +520,13 @@ class MangaVerseApp(ctk.CTk):
 
         # 3.3 Format & Destination Path Options
         export_card = ctk.CTkFrame(
-            config_container,
+            config_scroll,
             fg_color=PALETTE["inner_bg"],
             corner_radius=10,
             border_width=1,
             border_color=PALETTE["card_border"],
         )
-        export_card.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 12))
+        export_card.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 8))
         export_card.grid_columnconfigure(1, weight=1)
 
         fmt_lbl = ctk.CTkLabel(
@@ -532,7 +535,7 @@ class MangaVerseApp(ctk.CTk):
             font=ctk.CTkFont(size=10, weight="bold"),
             text_color=PALETTE["cyan_soft"],
         )
-        fmt_lbl.grid(row=0, column=0, sticky="w", padx=14, pady=(10, 4))
+        fmt_lbl.grid(row=0, column=0, sticky="w", padx=12, pady=(8, 3))
 
         self.format_segmented = ctk.CTkSegmentedButton(
             export_card,
@@ -543,7 +546,7 @@ class MangaVerseApp(ctk.CTk):
             font=ctk.CTkFont(size=12, weight="bold"),
         )
         self.format_segmented.set("CBZ (Comic)")
-        self.format_segmented.grid(row=0, column=1, columnspan=2, sticky="ew", padx=(0, 14), pady=(10, 8))
+        self.format_segmented.grid(row=0, column=1, columnspan=2, sticky="ew", padx=(0, 12), pady=(8, 6))
 
         path_lbl = ctk.CTkLabel(
             export_card,
@@ -551,7 +554,7 @@ class MangaVerseApp(ctk.CTk):
             font=ctk.CTkFont(size=10, weight="bold"),
             text_color=PALETTE["text_muted"],
         )
-        path_lbl.grid(row=1, column=0, sticky="w", padx=14, pady=(0, 12))
+        path_lbl.grid(row=1, column=0, sticky="w", padx=12, pady=(0, 8))
 
         self.dir_entry = ctk.CTkEntry(
             export_card,
@@ -561,7 +564,7 @@ class MangaVerseApp(ctk.CTk):
             font=ctk.CTkFont(size=12),
         )
         self.dir_entry.insert(0, self.default_output_dir)
-        self.dir_entry.grid(row=1, column=1, sticky="ew", padx=(0, 8), pady=(0, 12))
+        self.dir_entry.grid(row=1, column=1, sticky="ew", padx=(0, 8), pady=(0, 8))
 
         browse_btn = ctk.CTkButton(
             export_card,
@@ -573,11 +576,17 @@ class MangaVerseApp(ctk.CTk):
             font=ctk.CTkFont(size=12, weight="bold"),
             command=self._browse_directory,
         )
-        browse_btn.grid(row=1, column=2, sticky="e", padx=(0, 14), pady=(0, 12))
+        browse_btn.grid(row=1, column=2, sticky="e", padx=(0, 12), pady=(0, 8))
 
-        # 3.4 Action Buttons
-        actions_frame = ctk.CTkFrame(config_container, fg_color="transparent")
-        actions_frame.grid(row=3, column=0, sticky="ew", padx=16, pady=(0, 14))
+        # 3.4 Action Buttons (Permanently pinned at the bottom - never hidden!)
+        actions_frame = ctk.CTkFrame(
+            workspace,
+            corner_radius=12,
+            fg_color=PALETTE["card_bg"],
+            border_width=1,
+            border_color=PALETTE["card_border"],
+        )
+        actions_frame.grid(row=1, column=1, sticky="ew", padx=(0, 0), pady=(0, 0))
         actions_frame.grid_columnconfigure(0, weight=3)
         actions_frame.grid_columnconfigure(1, weight=1)
 
@@ -591,7 +600,7 @@ class MangaVerseApp(ctk.CTk):
             corner_radius=8,
             command=self._start_download,
         )
-        self.start_btn.grid(row=0, column=0, sticky="ew", padx=(0, 10))
+        self.start_btn.grid(row=0, column=0, sticky="ew", padx=(10, 8), pady=10)
 
         self.cancel_btn = ctk.CTkButton(
             actions_frame,
@@ -604,7 +613,7 @@ class MangaVerseApp(ctk.CTk):
             state="disabled",
             command=self._cancel_download,
         )
-        self.cancel_btn.grid(row=0, column=1, sticky="ew")
+        self.cancel_btn.grid(row=0, column=1, sticky="ew", padx=(0, 10), pady=10)
 
         # ----------------------------------------------------
         # 4. Bottom Activity & Glowing Progress Section
@@ -616,7 +625,7 @@ class MangaVerseApp(ctk.CTk):
             border_width=1,
             border_color=PALETTE["card_border"],
         )
-        bottom_frame.grid(row=3, column=0, sticky="ew", padx=20, pady=(0, 16))
+        bottom_frame.grid(row=3, column=0, sticky="ew", padx=20, pady=(0, 12))
         bottom_frame.grid_columnconfigure(0, weight=1)
 
         # Progress telemetry bar
@@ -679,7 +688,7 @@ class MangaVerseApp(ctk.CTk):
 
         self.log_textbox = ctk.CTkTextbox(
             bottom_frame,
-            height=85,
+            height=65,
             fg_color="#0A0D14",
             border_width=1,
             border_color=PALETTE["card_border"],
@@ -736,11 +745,11 @@ class MangaVerseApp(ctk.CTk):
     def _on_scope_change(self, value: str):
         """Toggles between Range, Single, and All input fields."""
         if value == "Range":
-            self.range_panel.grid(row=2, column=0, sticky="ew", padx=14, pady=(0, 10))
+            self.range_panel.grid(row=2, column=0, sticky="ew", padx=12, pady=(0, 8))
             self.single_panel.grid_forget()
         elif value == "Single Chapter":
             self.range_panel.grid_forget()
-            self.single_panel.grid(row=2, column=0, sticky="ew", padx=14, pady=(0, 10))
+            self.single_panel.grid(row=2, column=0, sticky="ew", padx=12, pady=(0, 8))
         else:  # All Chapters
             self.range_panel.grid_forget()
             self.single_panel.grid_forget()
@@ -927,7 +936,7 @@ class MangaVerseApp(ctk.CTk):
                     resp = requests.get(manga.cover_url, headers=headers, timeout=6)
                     if resp.status_code == 200:
                         img = Image.open(io.BytesIO(resp.content))
-                        ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(110, 160))
+                        ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(95, 135))
                         self.after(0, lambda: self.cover_label.configure(image=ctk_img))
                 except Exception:
                     pass
